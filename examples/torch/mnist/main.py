@@ -115,9 +115,10 @@ def main(config, args):
     # dataset
     # make single image into a sequence repeating the image for the number of steps
     steps = config["dataset"]["steps"]
+    x_to_bin = lambda x: x.gt(0.5).float()
     x_to_seq = lambda x: x.unsqueeze(0).expand(steps, -1, -1, -1)  # (c, h, w) -> (t, c, h, w)
-    train_ds = MNIST("data", download=True, train=True, transform=Compose([ToTensor(), Lambda(x_to_seq)]))
-    test_ds = MNIST("data", download=True, train=False, transform=Compose([ToTensor(), Lambda(x_to_seq)]))
+    train_ds = MNIST("data", download=True, train=True, transform=Compose([ToTensor(), Lambda(x_to_bin), Lambda(x_to_seq)]))
+    test_ds = MNIST("data", download=True, train=False, transform=Compose([ToTensor(), Lambda(x_to_bin), Lambda(x_to_seq)]))
 
     # dataloader
     train_loader = DataLoader(train_ds, shuffle=True, **config["dataloader"])
