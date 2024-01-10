@@ -1,11 +1,11 @@
 import torch
 import torch.nn as nn
 
-from lazy import BaseModuleMixin
-from utils import get_spike_fn
+from core.torch.lazy import BaseModuleMixin
+from core.torch.utils import get_spike_fn
 
 
-__all__ = ["Relu", "Tanh", "Identity", "CubaLif"]
+__all__ = ["Relu", "Tanh", "Identity", "CubaLif", "CubaSoftLif"]
 
 
 class Relu(nn.ReLU):
@@ -44,6 +44,11 @@ class CubaLif(BaseModuleMixin):
         super().__init__(dynamics, learnable)
         self.spike = get_spike_fn(spike_fn["name"], *spike_fn["shape"])
 
+    @staticmethod
+    def voltage_update(v, leak_v, s, i):
+        v = v * leak_v * (1 - s) + i
+        return v
+
     def forward(self, input, state):
         state = self.reset_state(input) if state is None else state
         i, v, s = state
@@ -64,3 +69,26 @@ class CubaLif(BaseModuleMixin):
 
     def reset_state(self, input):
         return torch.zeros(3, *input.shape, dtype=input.dtype, device=input.device)
+
+
+class CubaSoftLif(CubaLif):
+    '''
+    Soft reset for activation
+    '''
+    def forward(self, input, state):
+        state = self.reset_state(input) if state is None else state
+        i, v, s = state
+
+        # current update
+        leak_i = torch.sigmoid(self.leak_i)
+        i = i * leak_i + input
+
+        # voltage update with hard reset
+        leak_v = torch.sigmoid(self.leak_v)
+        thresh = torch.relu(self.thresh)
+        v = v * leak_v - (1 - s) * thresh + i
+
+        # spike!
+        s = self.spike(v - thresh)
+
+        return s, torch.stack([i, v, s])  # make sure that neuron output (spikes) are last

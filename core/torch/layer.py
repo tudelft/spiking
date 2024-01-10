@@ -1,11 +1,11 @@
 import torch
 import torch.nn as nn
 
-from neuron import *
-from synapse import *
+from core.torch.neuron import *
+from core.torch.synapse import *
 
 
-__all__ = ["Rnn", "Conv3dRelu", "Conv3dTanh", "Conv3dIdentity", "Conv3dCubaLif", "Conv3dRnn", "Conv3dRnnCubaLif"]
+__all__ = ["Rnn", "Conv3dRelu", "Conv3dTanh", "Conv3dIdentity", "Conv3dCubaLif", "TraceConv3dCubaLif", "LinearRelu", "LinearTanh", "LinearIdentity", "LinearCubaLif", "LinearCubaSoftLif", "Conv3dRnn", "Conv3dRnnCubaLif", "LinearRnnCubaLif"]
 
 
 class Conv3dRelu(nn.Module):
@@ -57,6 +57,26 @@ class TraceConv3dCubaLif(Conv3dCubaLif):
     synapse_module = TraceConv3d
 
 
+class LinearRelu(Conv3dRelu):
+    synapse_module = Linear
+
+
+class LinearTanh(Conv3dRelu):
+    synapse_module = Linear
+    neuron_module = Tanh
+
+
+class LinearIdentity(Conv3dIdentity):
+    synapse_module = Linear
+
+
+class LinearCubaLif(Conv3dRelu):
+    synapse_module = Linear
+    neuron_module = CubaLif
+
+class LinearCubaSoftLif(LinearCubaLif):
+    neuron_module = CubaSoftLif
+
 class Rnn(nn.Module):
     """
     Layer with explicit recurrency (recurrent connections).
@@ -91,6 +111,10 @@ class Rnn(nn.Module):
     def reset(self):
         self.state = [None, None, None]
 
+class LinearRnnCubaLif(Rnn):
+    synapse_ff_module = Linear
+    synapse_rec_module = Linear
+    neuron_module = CubaLif
 
 class Conv3dRnn(Rnn):
     synapse_ff_module = Conv3d
@@ -99,3 +123,4 @@ class Conv3dRnn(Rnn):
 
 class Conv3dRnnCubaLif(Conv3dRnn):
     neuron_module = CubaLif
+

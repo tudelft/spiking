@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from lazy import BaseModuleMixin
+from core.torch.lazy import BaseModuleMixin
 
 
 __all__ = ["Linear", "Conv3d", "TraceConv3d"]
@@ -20,6 +20,9 @@ class Linear(nn.LazyLinear):
     def forward(self, input, state):
         input = super().forward(input)
         return input, [input]
+    
+    def initialize_parameters(self, input, *_):  # catch and discard state argument
+        super().initialize_parameters(input)
 
 
 class Conv3d(nn.LazyConv3d):

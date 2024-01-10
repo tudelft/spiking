@@ -1,6 +1,6 @@
 import torch.nn as nn
 
-from layer import *
+from core.torch.layer import *
 
 
 def get_model(model, config, data=None, device=None):
