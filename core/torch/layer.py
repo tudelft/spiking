@@ -69,6 +69,9 @@ class LinearTanh(Conv3dRelu):
 class LinearIdentity(Conv3dIdentity):
     synapse_module = Linear
 
+class LinearLi(LinearIdentity):
+    synapse_module = Linear
+    neuron_module = Li
 
 class LinearCubaLif(Conv3dRelu):
     synapse_module = Linear
@@ -103,6 +106,7 @@ class Rnn(nn.Module):
         x_ff, synapse_ff_state = self.synapse_ff(input, synapse_ff_state)
         x = neuron_state[-1] if neuron_state is not None else torch.zeros_like(x_ff)  # assumes last is previous output
         x_rec, synapse_rec_state = self.synapse_rec(x, synapse_rec_state)
+        # print(x_ff.abs().max(), x_rec.abs().max())
         x, neuron_state = self.neuron(x_ff + x_rec, neuron_state)
 
         self.state = [synapse_ff_state, synapse_rec_state, neuron_state]
@@ -115,6 +119,11 @@ class LinearRnnCubaLif(Rnn):
     synapse_ff_module = Linear
     synapse_rec_module = Linear
     neuron_module = CubaLif
+
+class LinearRnnCubaSoftLif(Rnn):
+    synapse_ff_module = Linear
+    synapse_rec_module = Linear
+    neuron_module = CubaSoftLif
 
 class Conv3dRnn(Rnn):
     synapse_ff_module = Conv3d

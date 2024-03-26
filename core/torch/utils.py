@@ -47,4 +47,7 @@ class ArcTan(BaseSpike):
         x, height, slope = ctx.saved_tensors
         grad_input = grad_output.clone()
         sg = height / (1 + slope * x * x)
+        # print((1 + slope * x * x).min(), grad_input.isnan().any(), grad_input.isfinite().all())
+        # if not grad_input.isfinite().all():
+        #     print(grad_input)
         return grad_input * sg, None, None

@@ -19,6 +19,7 @@ class Linear(nn.LazyLinear):
 
     def forward(self, input, state):
         input = super().forward(input)
+
         return input, [input]
     
     def initialize_parameters(self, input, *_):  # catch and discard state argument
