@@ -135,7 +135,8 @@ class CubaSoftLif(CubaLif):
         leak_v = torch.sigmoid(self.leak_v)
         thresh = torch.relu(self.thresh)
 
-        v = (v * leak_v) - ((1 - s) * thresh) + i
+        v = (v * leak_v) - (s * thresh) + i
+        # v = torch.clip(v, -torch.inf, 2)
         # v = torch.relu(v)
         # leak_v_i = leak_v.register_hook(print_grad)
         # v = 3 * torch.sigmoid(v)
