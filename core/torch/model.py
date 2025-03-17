@@ -32,6 +32,7 @@ class BaseModel(nn.Module):
 
         # tracing (easier than checking for uninitialized params)
         self.traced = False
+        self.do_mask_grads = None
 
     def forward(self, input):
         raise NotImplementedError
